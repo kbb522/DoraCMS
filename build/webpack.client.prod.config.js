@@ -6,14 +6,23 @@ const SWPrecachePlugin = require('sw-precache-webpack-plugin')
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const srcDir = path.resolve(__dirname, '../dist/').replace(/\\/g, "\/")
 const prefixMulti = {}
-prefixMulti[srcDir] = ''
+prefixMulti[srcDir] = '';
+const utils = require('./utils')
 
 module.exports = {
     devtool: false,
     module: {
         rules: [{
+            test: /\.svg$/,
+            loader: 'svg-sprite-loader',
+            include: [utils.resolve('src/manage/icons')],
+            options: {
+                symbolId: 'icon-[name]'
+            }
+        }, {
             test: /\.(jpg|png|gif|eot|svg|ttf|woff|woff2)$/,
             loader: 'url-loader',
+            exclude: [utils.resolve('src/manage/icons')],
             query: {
                 limit: 10000,
                 name: 'static/img/[name].[hash:7].[ext]'
@@ -21,6 +30,9 @@ module.exports = {
         }, {
             test: /\.css$/,
             loader: ExtractTextPlugin.extract(['css-loader', 'postcss-loader'])
+        }, {
+            test: /\.scss/,
+            loader: ExtractTextPlugin.extract(['css-loader', 'postcss-loader', 'sass-loader'])
         }, {
             test: /\.less/,
             loader: ExtractTextPlugin.extract(['css-loader', 'postcss-loader', 'less-loader'])
@@ -33,7 +45,6 @@ module.exports = {
             }
         }),
         new ExtractTextPlugin('static/css/[name].[hash:7].css'),
-        // new BundleAnalyzerPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
             minChunks: function (module, count) {
@@ -65,19 +76,11 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             chunks: [
-                'manifest', 'vendor', 'element', 'app',
-            ],
-            filename: 'server.html',
-            template: 'src/template/server.html',
-            inject: true
-        }),
-        new HtmlWebpackPlugin({
-            chunks: [
                 'manifest', 'vendor', 'element', 'admin',
             ],
             filename: 'admin.html',
             template: 'src/template/admin.html',
-            manageCates: '<%= manageCates%>',
+            manageCates: '{{manageCates}}',
             inject: true
         })
     ]

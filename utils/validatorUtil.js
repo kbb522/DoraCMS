@@ -2,7 +2,6 @@
  * 全局校验类
  */
 const validator = require("validator");
-// const shortid = require('shortid');
 
 module.exports = {
 
@@ -13,6 +12,11 @@ module.exports = {
             newParams += str.substr(i, 1).replace(pattern, '');
         }
         return newParams;
+    },
+
+    // 校验资源名称 必须是英文
+    checkResourceName(str, min = 2, max = 6) {
+        return /^[a-zA-Z]+$/.test(str) && validator.isLength(str, min, max);
     },
     // 校验用户名
     checkUserName(str) {
